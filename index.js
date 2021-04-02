@@ -10,14 +10,14 @@ mongoose.connect("mongodb://localhost:27017/scrappingdb", {
 
 mongoose.connection
 	.once("open", function () {
-		console.log("Conection has been made");
+		console.log("Connection has been made");
 	})
 	.on("error", function (error) {
 		console.log("Connection error", error);
 	});
 
 //debut du scrap
-console.log("Début du scrapping");
+console.log("Start scrapping");
 
 let catalog = [];
 
@@ -59,6 +59,11 @@ let catalog = [];
 							.replaceAll(" ", "")
 					),
 					collection_name: product.querySelector("em")?.textContent.trim(),
+					ref: product
+						.querySelector(".card")
+						.getAttribute("onclick")
+						.replaceAll("window.location='./product?ref=", "")
+						.replaceAll("window.location='./product?ref=", "';"),
 				});
 			}
 			return productList;
@@ -73,7 +78,7 @@ let catalog = [];
 
 	console.log(catalog);
 
-	//save in db
+	//	save in db;
 	catalog.forEach((el) => {
 		let item = new Item(el);
 		item.save();
@@ -81,5 +86,5 @@ let catalog = [];
 
 	//close the browser
 	await browser.close();
-	console.log("Fin du scrapping");
+	console.log("END of scrapping");
 })();
