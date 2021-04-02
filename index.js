@@ -4,8 +4,8 @@ const Item = require("./dataModel");
 
 //connection to db
 mongoose.connect("mongodb://localhost:27017/scrappingdb", {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
 mongoose.connection
@@ -76,11 +76,11 @@ let catalog = [];
   
   //save in db
   catalog.forEach((el) => {
-  	// todo : add item only if item.ref not exists in db
+    // todo : add item only if item.ref not exists in db
     let item = new Item(el);
     item.save();
   });
-
+  
   //close the browser
   await browser.close();
   console.log("END of  scrapping");
