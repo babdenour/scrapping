@@ -23,7 +23,7 @@ const puppeteer = require('puppeteer');
     })
   
   for(category of categories){
-    await page.goto(`http://ndrt.alkebulabz.com/category?cat=${category.name}`);
+    await page.goto(`http://ndrt.alkebulabz.com/category?cat=${category.name.toLowerCase()}`);
     const productList = await page.evaluate(() => {
       let productList = [];
       
@@ -33,10 +33,10 @@ const puppeteer = require('puppeteer');
         
         // get product information to create object
         productList.push({
-          img: product.querySelector('img')?.src,
+          img: product.querySelector('img')?.src.toLowerCase(),
           name: product.querySelector('p.h4')?.textContent.trim(),
-          price: parseFloat(product.querySelector('p.text-gold')?.textContent.trim().slice(0,-2)),
-          collection: product.querySelector('em')?.textContent.trim()
+          price: parseFloat(product.querySelector('p.text-gold')?.textContent.replaceAll("€",'').replaceAll(" ","")),
+          collection: product.querySelector('em')?.textContent.trim().toLowerCase()
         })
       }
       return productList;
@@ -45,7 +45,7 @@ const puppeteer = require('puppeteer');
     // add categories product in same list
     for(product of productList){
       // add category name in product object
-      product.category = category.name
+      product.category = category.name.toLowerCase()
       catalog.push(product)
     }
   }
