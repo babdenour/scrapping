@@ -1,29 +1,27 @@
-console.log("Début du scrapping");
-const puppeteer = require('puppeteer');
-
-
-// todo : get category name dynamicly
-const categories = [
-  {
-    name: 'wallet'
-  },
-  {
-    name: 'hat'
-  },
-  {
-    name: 'bag'
-  },
-  {
-    name: 'socks'
-  }
-];
-
 let catalog = [];
 
+console.log("Début du scrapping");
+
+const puppeteer = require('puppeteer');
+
 (async () => {
-  const browser = await puppeteer.launch({headless: false});
+  const browser = await puppeteer.launch({headless: true});
   const page = await browser.newPage();
 
+    await page.goto(`http://ndrt.alkebulabz.com/`);
+    const categories = await page.evaluate(() => {
+      let categoryList = [];
+      // find categorie
+      let categories = document.querySelectorAll('.card');
+      // get categories name
+      for (category of categories) {
+        categoryList.push({
+          name: category.querySelector('p.h5')?.textContent.trim()
+        })
+      }
+      return categoryList;
+    })
+  
   for(category of categories){
     await page.goto(`http://ndrt.alkebulabz.com/category?cat=${category.name}`);
     const productList = await page.evaluate(() => {
@@ -56,4 +54,9 @@ let catalog = [];
   await browser.close();
   console.log("Fin du scrapping");
 })();
+
+
+
+
+
 
