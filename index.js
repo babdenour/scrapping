@@ -1,10 +1,9 @@
-console.log("start");
+console.log("Début du scrapping");
 const puppeteer = require('puppeteer');
-const month = '09';
-const year = '2020';
 
 
-const category = [
+// todo : get category name dynamicly
+const categories = [
   {
     name: 'wallet'
   },
@@ -17,29 +16,44 @@ const category = [
   {
     name: 'socks'
   }
-]
+];
 
-const ndrt = 'http://ndrt.alkebulabz.com/category?cat=hat';
+let catalog = [];
+
 (async () => {
   const browser = await puppeteer.launch({headless: false});
   const page = await browser.newPage();
-  await page.goto(ndrt);
-  const gears = await page.evaluate(() => {
-    let movies = [];
-    // let elements = document.querySelectorAll('div.list_item');
-    let hats = document.querySelectorAll('.ndrt-hover');
-    for (hat of hats) {
-      movies.push({
-        img: hat.querySelector('img')?.src,
-        name: hat.querySelector('p.h4')?.textContent.trim(),
-        price: parseFloat(hat.querySelector('p.text-gold')?.textContent.trim().slice(0,-2)),
-        collection: hat.querySelector('em')?.textContent.trim()
-      })
+
+  for(category of categories){
+    await page.goto(`http://ndrt.alkebulabz.com/category?cat=${category.name}`);
+    const productList = await page.evaluate(() => {
+      let productList = [];
+      
+      // get products from
+      let products = document.querySelectorAll('.mb-1');
+      for (product of products) {
+        
+        // get product information to create object
+        productList.push({
+          img: product.querySelector('img')?.src,
+          name: product.querySelector('p.h4')?.textContent.trim(),
+          price: parseFloat(product.querySelector('p.text-gold')?.textContent.trim().slice(0,-2)),
+          collection: product.querySelector('em')?.textContent.trim()
+        })
+      }
+      return productList;
+    })
+    
+    // add categories product in same list
+    for(product of productList){
+      // add category name in product object
+      product.category = category.name
+      catalog.push(product)
     }
-    return movies;
-  });
+  }
   
-  gears.push({test: 'test'})
-  console.log(gears);
+  console.log(catalog);
   await browser.close();
+  console.log("Fin du scrapping");
 })();
+
