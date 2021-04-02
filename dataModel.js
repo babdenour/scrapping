@@ -4,11 +4,12 @@ const Schema = mongoose.Schema;
 
 //Creat Shema and model
 const ItemSchema = new Schema({
-	img: String,
+	ref: String,
 	name: String,
 	price: Number,
-	collection_name: String,
 	category: String,
+	collection_name: String,
+	img: String,
 });
 
 const Item = mongoose.model("item", ItemSchema);
