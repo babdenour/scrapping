@@ -1,34 +1,62 @@
-console.log("start");
-const puppeteer = require("puppeteer");
+let catalog = [];
+
+console.log("Début du scrapping");
+
+const puppeteer = require('puppeteer');
 
 (async () => {
-	const browser = await puppeteer.launch();
-	const page = await browser.newPage();
-	await page.goto(
-		"https://www.footlocker.fr/fr/category/all/jordan/jordan-1.html"
-	);
-	const sneakers = await page.evaluate(() => {
-		let snkrs = [];
-		let list = document.querySelector("div.ProductCard");
-		console.log(list);
-		//let els = document.querySelectorAll("div.fl-product-productlist--item");
-		//*[@id="main"]/div/div[2]/div/section/div/div[2]/ul[1]/li[6]/div[2]
-		// els.forEach((el) => {
-		// 	(list = el
-		// 		.querySelector("div.fl-product-tile--name")
-		// 		?.textContent.trim()),
-		// 		snkrs.push({
-		// 			title: el
-		// 				.querySelector("div.fl-product-tile--name")
-		// 				?.textContent.trim(),
-		// 			url: el.querySelector("div.fl-product-tile--basic a")?.textContent,
-		// 			img: el.querySelector("picture.fl-picture")?.src,
-		// 		});
-		// console.log(list);
-		//	});
-		return snkrs;
-	});
-	console.log("snkrs", sneakers);
+  const browser = await puppeteer.launch({headless: true});
+  const page = await browser.newPage();
 
-	await browser.close();
+    await page.goto(`http://ndrt.alkebulabz.com/`);
+    const categories = await page.evaluate(() => {
+      let categoryList = [];
+      // find categorie
+      let categories = document.querySelectorAll('.card');
+      // get categories name
+      for (category of categories) {
+        categoryList.push({
+          name: category.querySelector('p.h5')?.textContent.trim()
+        })
+      }
+      return categoryList;
+    })
+  
+  for(category of categories){
+    await page.goto(`http://ndrt.alkebulabz.com/category?cat=${category.name.toLowerCase()}`);
+    const productList = await page.evaluate(() => {
+      let productList = [];
+      
+      // get products from
+      let products = document.querySelectorAll('.mb-1');
+      for (product of products) {
+        
+        // get product information to create object
+        productList.push({
+          img: product.querySelector('img')?.src.toLowerCase(),
+          name: product.querySelector('p.h4')?.textContent.trim(),
+          price: parseFloat(product.querySelector('p.text-gold')?.textContent.replaceAll("€",'').replaceAll(" ","")),
+          collection: product.querySelector('em')?.textContent.trim().toLowerCase()
+        })
+      }
+      return productList;
+    })
+    
+    // add categories product in same list
+    for(product of productList){
+      // add category name in product object
+      product.category = category.name.toLowerCase()
+      catalog.push(product)
+    }
+  }
+  
+  console.log(catalog);
+  await browser.close();
+  console.log("Fin du scrapping");
 })();
+
+
+
+
+
+
